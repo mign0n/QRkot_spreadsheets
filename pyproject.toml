@@ -1,0 +1,18 @@
+[tool.black]
+extend-exclude = """
+(
+  alembic
+  | tests
+)
+"""
+line-length = 79
+skip-string-normalization = "true"
+target-version = ["py39"]
+
+[tool.isort]
+atomic = "true"
+extend_skip = ["tests", "alembic"]
+py_version = 39
+profile = "black"
+line_length = 79
+src_paths = "app"
