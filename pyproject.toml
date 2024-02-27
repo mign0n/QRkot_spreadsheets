@@ -1,0 +1,55 @@
+[project]
+name = "QRKot"
+version = "0.0.1"
+authors = [
+    {name = "mign0n", email = "mign0n.git@gmail.com"}, ]
+description = ""
+readme = "README.md"
+requires-python = "==3.9.10"
+dependencies = [
+    "aiogoogle==4.2.0",
+    "aiohttp==3.7.4.post0",
+    "aiosqlite==0.17.0",
+    "alembic==1.7.7",
+    "fastapi==0.109.1",
+    "fastapi-users[sqlalchemy]",
+    "pydantic[email]",
+    "requests",
+    "uvicorn[standard]==0.17.6"
+]
+
+[project.optional-dependencies]
+dev = [
+    "black",
+    "flake8==4.0.1",
+    "isort",
+    "mixer",
+    "pluggy==1.0.0",
+    "pytest==7.1.3",
+    "pytest-asyncio",
+    "pytest-freezegun",
+    "pytest-lazy-fixture",
+    "pytest-pythonpath"
+]
+
+[tool.black]
+extend-exclude = """
+(
+  alembic
+  | tests
+)
+"""
+line-length = 79
+skip-string-normalization = "true"
+target-version = ["py39"]
+
+[tool.isort]
+atomic = "true"
+extend_skip = ["tests", "alembic"]
+py_version = 39
+profile = "black"
+line_length = 79
+src_paths = "app"
+
+[tool.setuptools]
+packages = ["app", "alembic"]
