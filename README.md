@@ -56,7 +56,7 @@ uvicorn app.main:app
 
 ## API
 
-Документация к API досупна по адресам:
+Документация к API доступна по адресам:
 
 - Swagger: [http://127.0.0.1:8000/docs](http://127.0.0.1:8000/docs)
 - Redoc: [http://127.0.0.1:8000/redoc](http://127.0.0.1:8000/redoc)
