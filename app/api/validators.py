@@ -76,8 +76,8 @@ async def check_data_fits_table_grid(
     column_count: int,
 ) -> None:
     if (
-        len(table_in) > row_count
-        or max(len(row) for row in table_in) > column_count
+        len(table_in) > row_count or
+        max(len(row) for row in table_in) > column_count
     ):
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
