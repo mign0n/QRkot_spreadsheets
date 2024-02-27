@@ -8,7 +8,7 @@ aiofiles==23.2.1
     # via aiogoogle
 aiogoogle==4.2.0
     # via QRKot (pyproject.toml)
-aiohttp==3.7.4.post0
+aiohttp==3.9.2
     # via
     #   QRKot (pyproject.toml)
     #   aiogoogle
