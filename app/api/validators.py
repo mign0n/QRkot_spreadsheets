@@ -68,18 +68,3 @@ async def check_project_full_amount_less_invested(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail='Нельзя установить требуемую сумму меньше внесённой.',
         )
-
-
-async def check_data_fits_table_grid(
-    table_in: list[list[str]],
-    row_count: int,
-    column_count: int,
-) -> None:
-    if (
-        len(table_in) > row_count or
-        max(len(row) for row in table_in) > column_count
-    ):
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail='Передаваемые данные не поместятся в созданной таблице.',
-        )

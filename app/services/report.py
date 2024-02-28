@@ -1,14 +1,13 @@
 from copy import deepcopy
 from datetime import datetime
 
-from aiogoogle import Aiogoogle
+from aiogoogle import Aiogoogle, GoogleAPI
+from fastapi import HTTPException, status
 
-from app.api.validators import check_data_fits_table_grid
 from app.core.config import settings
 from app.models import CharityProject
 
 FORMAT = '%Y/%m/%d %H:%M:%S'
-LOCALE = 'ru_RU'
 TITLE = 'Отчёт от'
 SPREADSHEET_PERMISSIONS = {
     'type': 'user',
@@ -17,20 +16,6 @@ SPREADSHEET_PERMISSIONS = {
 }
 ROW_COUNT = 100
 COLUMN_COUNT = 11
-SHEETS = [
-    {
-        'properties': {
-            'sheetType': 'GRID',
-            'sheetId': 0,
-            'title': 'Лист1',
-            'gridProperties': {
-                'rowCount': ROW_COUNT,
-                'columnCount': COLUMN_COUNT,
-            },
-        },
-    },
-]
-
 TABLE_HEADER = [
     ['Топ проектов по скорости закрытия'],
     ['Название проекта', 'Время сбора', 'Описание'],
@@ -38,9 +23,21 @@ TABLE_HEADER = [
 SPREADSHEET_PROPERTIES = {
     'properties': {
         'title': TITLE,
-        'locale': LOCALE,
+        'locale': 'ru_RU',
     },
-    'sheets': SHEETS,
+    'sheets': [
+        {
+            'properties': {
+                'sheetType': 'GRID',
+                'sheetId': 0,
+                'title': 'Лист1',
+                'gridProperties': {
+                    'rowCount': ROW_COUNT,
+                    'columnCount': COLUMN_COUNT,
+                },
+            },
+        },
+    ],
 }
 
 
@@ -62,14 +59,16 @@ async def spreadsheets_create(
 async def set_user_permissions(
     spreadsheet_id: str,
     wrapper_services: Aiogoogle,
-) -> None:
+) -> GoogleAPI:
+    drive_service = await wrapper_services.discover('drive', 'v3')
     await wrapper_services.as_service_account(
-        (await wrapper_services.discover('drive', 'v3')).permissions.create(
+        drive_service.permissions.create(
             fileId=spreadsheet_id,
             json=SPREADSHEET_PERMISSIONS,
             fields='id',
         ),
     )
+    return drive_service
 
 
 async def spreadsheets_update_value(
@@ -94,13 +93,29 @@ async def spreadsheets_update_value(
             for project in projects
         ],
     ]
-    await check_data_fits_table_grid(table_values, ROW_COUNT, COLUMN_COUNT)
+
+    table_row_count = len(table_values)
+    table_column_count = max(len(row) for row in table_values)
+    if table_row_count > ROW_COUNT or table_column_count > COLUMN_COUNT:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=(
+                'Передаваемые данные размером {}x{} не поместятся в '
+                'созданной таблице размером {}x{}.'
+            ).format(
+                table_column_count,
+                table_row_count,
+                COLUMN_COUNT,
+                ROW_COUNT,
+            ),
+        )
+
     await wrapper_services.as_service_account(
         (
             await wrapper_services.discover('sheets', 'v4')
         ).spreadsheets.values.update(
             spreadsheetId=spreadsheet_id,
-            range='R1C1:R{}C{}'.format(ROW_COUNT, COLUMN_COUNT),
+            range='R1C1:R{}C{}'.format(table_row_count, table_column_count),
             valueInputOption='USER_ENTERED',
             json={'majorDimension': 'ROWS', 'values': table_values},
         )
