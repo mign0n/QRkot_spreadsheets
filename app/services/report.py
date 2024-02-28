@@ -2,7 +2,6 @@ from copy import deepcopy
 from datetime import datetime
 
 from aiogoogle import Aiogoogle, GoogleAPI
-from fastapi import HTTPException, status
 
 from app.core.config import settings
 from app.models import CharityProject
@@ -95,11 +94,10 @@ async def spreadsheets_update_value(
     ]
 
     table_row_count = len(table_values)
-    table_column_count = max(len(row) for row in table_values)
+    table_column_count = max(map(len, table_values))
     if table_row_count > ROW_COUNT or table_column_count > COLUMN_COUNT:
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail=(
+        raise ValueError(
+            (
                 'Передаваемые данные размером {}x{} не поместятся в '
                 'созданной таблице размером {}x{}.'
             ).format(
@@ -115,7 +113,7 @@ async def spreadsheets_update_value(
             await wrapper_services.discover('sheets', 'v4')
         ).spreadsheets.values.update(
             spreadsheetId=spreadsheet_id,
-            range='R1C1:R{}C{}'.format(table_row_count, table_column_count),
+            range=f'R1C1:R{table_row_count}C{table_column_count}',
             valueInputOption='USER_ENTERED',
             json={'majorDimension': 'ROWS', 'values': table_values},
         )

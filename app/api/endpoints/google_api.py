@@ -40,12 +40,12 @@ async def get_report(
             ),
             wrapper_services,
         )
-    except HTTPException as error:
+    except ValueError as error:
         await wrapper_services.as_service_account(
             drive_service.files.delete(fileId=spreadsheet_id),
         )
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
-            detail=error.detail,
+            detail=str(error),
         )
     return spreadsheet_url
