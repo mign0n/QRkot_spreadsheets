@@ -36,7 +36,7 @@ google-auth==2.8.0
 greenlet==1.1.2
 h11==0.13.0
 httptools==0.4.0
-idna==3.3
+idna==3.7
 iniconfig==1.1.1
 lock==2018.3.25.2110
 makefun==1.13.1
